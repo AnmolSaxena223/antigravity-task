@@ -1,0 +1,37 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.xssSanitizer = void 0;
+const clean = (val) => {
+    if (typeof val === 'string') {
+        // Strip HTML and script tags to prevent XSS attacks while keeping standard text intact
+        return val
+            .replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, '')
+            .replace(/<[^>]*>/g, '');
+    }
+    if (Array.isArray(val)) {
+        return val.map(clean);
+    }
+    if (typeof val === 'object' && val !== null) {
+        const cleanedObj = {};
+        for (const key in val) {
+            if (Object.prototype.hasOwnProperty.call(val, key)) {
+                cleanedObj[key] = clean(val[key]);
+            }
+        }
+        return cleanedObj;
+    }
+    return val;
+};
+const xssSanitizer = (req, res, next) => {
+    if (req.body) {
+        req.body = clean(req.body);
+    }
+    if (req.query) {
+        req.query = clean(req.query);
+    }
+    if (req.params) {
+        req.params = clean(req.params);
+    }
+    next();
+};
+exports.xssSanitizer = xssSanitizer;

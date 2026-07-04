@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 font-sans antialiased overflow-x-hidden transition-colors duration-300;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(30, 41, 59, 0.5) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.8) 0px, transparent 50%),
+      radial-gradient(at 50% 0%, rgba(30, 27, 75, 0.4) 0px, transparent 50%);
+  }
+
+  body.light {
+    @apply bg-slate-50 text-slate-900;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(226, 232, 240, 0.8) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(241, 245, 249, 0.9) 0px, transparent 50%),
+      radial-gradient(at 50% 0%, rgba(224, 231, 255, 0.6) 0px, transparent 50%);
+  }
+}
+
+@layer components {
+  /* Glassmorphism Cards */
+  .glass-card {
+    @apply bg-white/70 dark:bg-black/35 backdrop-blur-md border border-slate-200/50 dark:border-white/10 rounded-2xl shadow-lg dark:shadow-2xl transition-all duration-300;
+  }
+  
+  .glass-card-hover {
+    @apply hover:bg-white/90 dark:hover:bg-black/45 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-2xl hover:border-slate-300 dark:hover:border-white/20;
+  }
+
+  /* Custom inputs with glass styles */
+  .glass-input {
+    @apply bg-slate-100/50 dark:bg-black/25 border border-slate-200 dark:border-white/5 focus:border-indigo-500/60 dark:focus:border-indigo-500/30 text-slate-800 dark:text-slate-100 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/20 backdrop-blur-sm transition-all duration-300;
+  }
+
+  /* Standard premium buttons */
+  .glass-btn {
+    @apply relative overflow-hidden flex items-center justify-center gap-2 font-semibold transition-all duration-300 active:scale-95 rounded-xl;
+  }
+
+  .glass-btn-primary {
+    @apply bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-0.5;
+  }
+
+  .glass-btn-secondary {
+    @apply bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white border border-slate-200 dark:border-white/5;
+  }
+
+  /* Glowing indicators */
+  .glow-red {
+    box-shadow: 0 0 15px rgba(255, 59, 48, 0.6);
+  }
+  .glow-green {
+    box-shadow: 0 0 15px rgba(52, 199, 89, 0.6);
+  }
+  .glow-yellow {
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
+  }
+  .glow-blue {
+    box-shadow: 0 0 15px rgba(0, 122, 255, 0.6);
+  }
+}
+
+/* Custom Webkit scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-indigo-600/30 dark:bg-indigo-500/20 rounded-full hover:bg-indigo-600/50 dark:hover:bg-indigo-500/30;
+}
+
+/* Ludo Home Layout Grid Cells */
+.ludo-grid-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
