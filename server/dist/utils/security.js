@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateRandomString = exports.generateOTP = exports.verifyRefreshToken = exports.verifyAccessToken = exports.generateRefreshToken = exports.generateAccessToken = exports.verifyPassword = exports.hashPassword = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const crypto_1 = __importDefault(require("crypto"));
 const env_1 = require("../config/env");
@@ -13,14 +13,14 @@ const BCRYPT_SALT_ROUNDS = 10;
  * Hash a plain text password.
  */
 const hashPassword = async (password) => {
-    return bcrypt_1.default.hash(password, BCRYPT_SALT_ROUNDS);
+    return bcryptjs_1.default.hash(password, BCRYPT_SALT_ROUNDS);
 };
 exports.hashPassword = hashPassword;
 /**
  * Verify a plain text password against a hash.
  */
 const verifyPassword = async (password, hash) => {
-    return bcrypt_1.default.compare(password, hash);
+    return bcryptjs_1.default.compare(password, hash);
 };
 exports.verifyPassword = verifyPassword;
 /**

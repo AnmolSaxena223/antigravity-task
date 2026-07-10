@@ -1,9 +1,8 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IUser extends Document {
-  phone: string;
+  email: string;
   name: string;
-  email?: string;
   password?: string;
   otp?: string;
   otpExpiry?: Date;
@@ -34,11 +33,12 @@ export interface IUser extends Document {
 
 const UserSchema = new Schema<IUser>(
   {
-    phone: {
+    email: {
       type: String,
       required: true,
       unique: true,
       trim: true,
+      lowercase: true,
       index: true,
     },
     friendId: {
@@ -51,13 +51,6 @@ const UserSchema = new Schema<IUser>(
       type: String,
       default: 'Ludo Master',
       trim: true,
-    },
-    email: {
-      type: String,
-      unique: true,
-      sparse: true, // Allow multiple nulls/undefineds
-      trim: true,
-      lowercase: true,
     },
     password: {
       type: String,

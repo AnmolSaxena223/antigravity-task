@@ -7,7 +7,7 @@ import GlassCard from '../components/GlassCard';
 import ThemeToggle from '../components/ThemeToggle';
 import SoundToggle from '../components/SoundToggle';
 import audioSynth from '../utils/audio';
-import { Phone, Lock, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
+import { Mail, Lock, ArrowRight, ShieldAlert, Sparkles } from 'lucide-react';
 
 interface LoginProps {
   onNavigate: (page: string, data?: any) => void;
@@ -21,13 +21,13 @@ const Login: React.FC<LoginProps> = ({ onNavigate }) => {
     dispatch(clearError());
   }, [dispatch]);
 
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginMethod, setLoginMethod] = useState<'password' | 'otp'>('otp');
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const validatePhone = (num: string) => {
-    return /^\d{10,12}$/.test(num);
+  const validateEmail = (val: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -36,11 +36,11 @@ const Login: React.FC<LoginProps> = ({ onNavigate }) => {
     setValidationError(null);
     dispatch(clearError());
 
-    if (!phone) {
-      return setValidationError('Phone number is required.');
+    if (!email) {
+      return setValidationError('Email address is required.');
     }
-    if (!validatePhone(phone)) {
-      return setValidationError('Please enter a valid phone number (10-12 digits).');
+    if (!validateEmail(email)) {
+      return setValidationError('Please enter a valid email address.');
     }
 
     if (loginMethod === 'password') {
@@ -52,7 +52,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate }) => {
       dispatch(authStart());
       const response = await apiRequest('/auth/login', {
         method: 'POST',
-        body: JSON.stringify({ phone, password })
+        body: JSON.stringify({ email, password })
       });
 
       if (response.success && response.accessToken && response.user) {
@@ -64,14 +64,14 @@ const Login: React.FC<LoginProps> = ({ onNavigate }) => {
     } else {
       // OTP Method: request OTP and redirect to OTP Verify screen
       dispatch(authStart());
-      const response = await apiRequest('/auth/send-otp', {
+      const response = await apiRequest('/auth/send-email-otp', {
         method: 'POST',
-        body: JSON.stringify({ phone })
+        body: JSON.stringify({ email })
       });
 
       if (response.success) {
         dispatch(clearError()); // Clear login loading state
-        onNavigate('otp-verification', { phone, mode: 'login' });
+        onNavigate('otp-verification', { email, mode: 'login' });
       } else {
         dispatch(authFailure(response.message || 'Failed to send OTP.'));
       }
@@ -117,22 +117,21 @@ const Login: React.FC<LoginProps> = ({ onNavigate }) => {
         )}
 
         <form onSubmit={handleLoginSubmit} className="space-y-5">
-          {/* Phone Field */}
+          {/* Email Field */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              PHONE NUMBER
+              Email Address
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-800 dark:text-slate-400">
-                <Phone size={18} />
+                <Mail size={18} />
               </span>
               <input
-                type="tel"
-                placeholder="Enter 10-digit phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                type="email"
+                placeholder="Enter email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-12 glass-input"
-                maxLength={12}
                 disabled={loading}
               />
             </div>
@@ -188,7 +187,7 @@ const Login: React.FC<LoginProps> = ({ onNavigate }) => {
               <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
-                {loginMethod === 'otp' ? 'Request Secure OTP' : 'Sign In Account'}
+                {loginMethod === 'otp' ? 'Send Email OTP' : 'Sign In Account'}
                 <ArrowRight size={16} />
               </>
             )}

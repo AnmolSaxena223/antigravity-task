@@ -41,8 +41,8 @@ const validation_1 = require("../middleware/validation");
 const router = (0, express_1.Router)();
 // Rate limited auth endpoints
 router.post('/register', rateLimiter_1.authLimiter, validation_1.validateRegister, authController.register);
-router.post('/send-otp', rateLimiter_1.authLimiter, validation_1.validateLogin, authController.sendOtp);
-router.post('/verify-otp', rateLimiter_1.authLimiter, validation_1.validateVerifyOtp, authController.verifyOtp);
+router.post('/send-email-otp', rateLimiter_1.authLimiter, validation_1.validateLogin, authController.sendEmailOtp);
+router.post('/verify-email-otp', rateLimiter_1.authLimiter, validation_1.validateVerifyOtp, authController.verifyEmailOtp);
 router.post('/login', rateLimiter_1.authLimiter, validation_1.validateLogin, authController.login);
 router.post('/refresh-token', authController.refreshToken);
 // Protected profile endpoints

@@ -313,10 +313,10 @@ class SocketService {
                 return;
             }
             // Find or create Bot User
-            let botUser = await User_1.User.findOne({ phone: '0000000000' });
+            let botUser = await User_1.User.findOne({ email: 'bot@ludomaster.com' });
             if (!botUser) {
                 botUser = new User_1.User({
-                    phone: '0000000000',
+                    email: 'bot@ludomaster.com',
                     name: 'AI Bot',
                     avatar: 'avatar_5',
                     isVerified: true,

@@ -16,9 +16,8 @@ export interface UserProfile {
   id: string;
   _id?: string;
   friendId?: string;
-  phone: string;
   name: string;
-  email?: string;
+  email: string;
   avatar: string;
   balance: UserBalance;
   referralCode: string;

@@ -10,7 +10,7 @@ import audioSynth from '../utils/audio';
 import { KeyRound, ArrowRight, ShieldAlert, Timer } from 'lucide-react';
 
 interface OtpVerificationProps {
-  data: { phone: string; mode: string }; // Phone number and mode ('login' or 'register')
+  data: { email: string; mode: string }; // Email and mode ('login' or 'register')
   onNavigate: (page: string, data?: any) => void;
 }
 
@@ -18,9 +18,9 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ data, onNavigate }) =
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state: RootState) => state.auth);
   
-  const phone = data?.phone || '';
+  const email = data?.email || '';
   const [otpArray, setOtpArray] = useState(['', '', '', '', '', '']);
-  const [resendCooldown, setResendCooldown] = useState(60);
+  const [resendCooldown, setResendCooldown] = useState(30);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -104,9 +104,9 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ data, onNavigate }) =
     }
 
     dispatch(authStart());
-    const response = await apiRequest('/auth/verify-otp', {
+    const response = await apiRequest('/auth/verify-email-otp', {
       method: 'POST',
-      body: JSON.stringify({ phone, otp: otpCode })
+      body: JSON.stringify({ email, otp: otpCode })
     });
 
     if (response.success && response.accessToken && response.user) {
@@ -126,13 +126,13 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ data, onNavigate }) =
     setOtpArray(['', '', '', '', '', '']);
     inputRefs.current[0]?.focus();
 
-    const response = await apiRequest('/auth/send-otp', {
+    const response = await apiRequest('/auth/send-email-otp', {
       method: 'POST',
-      body: JSON.stringify({ phone })
+      body: JSON.stringify({ email })
     });
 
     if (response.success) {
-      setResendCooldown(60);
+      setResendCooldown(30);
     } else {
       setValidationError(response.message || 'Failed to resend OTP.');
     }
@@ -157,10 +157,10 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ data, onNavigate }) =
             <KeyRound size={28} />
           </div>
           <h2 className="text-2xl font-extrabold tracking-wide dark:text-white">
-            Verify Phone
+            Verify Email
           </h2>
           <p className="text-sm text-slate-800 dark:text-slate-400 mt-1.5">
-            We sent a secure code to <span className="font-bold text-indigo-500">{phone}</span>
+            We sent a secure code to <span className="font-bold text-indigo-500">{email}</span>
           </p>
         </div>
 
@@ -226,7 +226,7 @@ const OtpVerification: React.FC<OtpVerificationProps> = ({ data, onNavigate }) =
               onClick={handleResendOtp}
               className="text-indigo-500 hover:text-indigo-400 font-extrabold text-sm hover:underline"
             >
-              Resend SMS Code
+              Resend OTP
             </button>
           )}
 

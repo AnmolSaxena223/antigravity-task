@@ -152,7 +152,7 @@ const Wallet: React.FC<WalletProps> = ({ onNavigate }) => {
       },
       prefill: {
         name: user?.name || '',
-        contact: user?.phone || ''
+        email: user?.email || ''
       },
       theme: {
         color: '#6366f1' // purple/indigo

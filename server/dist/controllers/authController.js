@@ -1,31 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.updateProfile = exports.getProfile = exports.refreshToken = exports.login = exports.verifyOtp = exports.sendOtp = exports.register = void 0;
+exports.logout = exports.updateProfile = exports.getProfile = exports.refreshToken = exports.login = exports.verifyEmailOtp = exports.sendEmailOtp = exports.register = void 0;
 const User_1 = require("../models/User");
 const Referral_1 = require("../models/Referral");
 const Transaction_1 = require("../models/Transaction");
 const env_1 = require("../config/env");
 const security_1 = require("../utils/security");
-/**
- * Send OTP mock service
- */
-const sendMockSMS = (phone, otp) => {
-    console.log(`\n==============================================`);
-    console.log(`[SMS Gateway] Sending OTP ${otp} to phone ${phone}`);
-    console.log(`==============================================\n`);
-};
+const emailService_1 = require("../services/emailService");
 /**
  * Register User
  */
 const register = async (req, res) => {
     try {
-        const { phone, name, email, password, referralCode } = req.body;
-        if (!phone) {
-            return res.status(400).json({ success: false, message: 'Phone number is required.' });
+        const { name, email, password, referralCode } = req.body;
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email address is required.' });
         }
-        const existingUser = await User_1.User.findOne({ phone });
+        const existingUser = await User_1.User.findOne({ email: email.toLowerCase() });
         if (existingUser) {
-            return res.status(400).json({ success: false, message: 'Phone number is already registered.' });
+            return res.status(400).json({ success: false, message: 'Email address is already registered.' });
         }
         // Process referral code if provided
         let referrerUser = null;
@@ -47,9 +40,8 @@ const register = async (req, res) => {
         const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
         const hashedPassword = password ? await (0, security_1.hashPassword)(password) : undefined;
         const user = new User_1.User({
-            phone,
+            email: email.toLowerCase(),
             name: name || 'Ludo Player',
-            email,
             password: hashedPassword,
             otp,
             otpExpiry,
@@ -58,11 +50,11 @@ const register = async (req, res) => {
             referredBy: referrerUser ? referrerUser._id : undefined
         });
         await user.save();
-        sendMockSMS(phone, otp);
+        await (0, emailService_1.sendOTPEmail)(email, otp);
         return res.status(201).json({
             success: true,
             message: 'Registration successful. OTP sent for verification.',
-            phone
+            email
         });
     }
     catch (error) {
@@ -71,22 +63,23 @@ const register = async (req, res) => {
 };
 exports.register = register;
 /**
- * Send OTP to existing / registering user
+ * Send OTP to existing / registering user email
  */
-const sendOtp = async (req, res) => {
+const sendEmailOtp = async (req, res) => {
     try {
-        const { phone } = req.body;
-        if (!phone) {
-            return res.status(400).json({ success: false, message: 'Phone number is required.' });
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ success: false, message: 'Email address is required.' });
         }
-        let user = await User_1.User.findOne({ phone });
+        let user = await User_1.User.findOne({ email: email.toLowerCase() });
         // If user doesn't exist, we can register them automatically
         const otp = (0, security_1.generateOTP)();
         const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
         if (!user) {
             const newUserReferralCode = 'REF' + (0, security_1.generateRandomString)(5);
             user = new User_1.User({
-                phone,
+                email: email.toLowerCase(),
+                name: email.split('@')[0] || 'Ludo Player',
                 otp,
                 otpExpiry,
                 isVerified: false,
@@ -98,28 +91,28 @@ const sendOtp = async (req, res) => {
             user.otpExpiry = otpExpiry;
         }
         await user.save();
-        sendMockSMS(phone, otp);
+        await (0, emailService_1.sendOTPEmail)(email, otp);
         return res.status(200).json({
             success: true,
             message: 'OTP sent successfully.',
-            phone
+            email
         });
     }
     catch (error) {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
-exports.sendOtp = sendOtp;
+exports.sendEmailOtp = sendEmailOtp;
 /**
- * Verify OTP & Issue Token
+ * Verify Email OTP & Issue Token
  */
-const verifyOtp = async (req, res) => {
+const verifyEmailOtp = async (req, res) => {
     try {
-        const { phone, otp } = req.body;
-        if (!phone || !otp) {
-            return res.status(400).json({ success: false, message: 'Phone and OTP are required.' });
+        const { email, otp } = req.body;
+        if (!email || !otp) {
+            return res.status(400).json({ success: false, message: 'Email and OTP are required.' });
         }
-        const user = await User_1.User.findOne({ phone });
+        const user = await User_1.User.findOne({ email: email.toLowerCase() });
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found.' });
         }
@@ -196,7 +189,6 @@ const verifyOtp = async (req, res) => {
             accessToken,
             user: {
                 id: user._id,
-                phone: user.phone,
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,
@@ -212,17 +204,17 @@ const verifyOtp = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 };
-exports.verifyOtp = verifyOtp;
+exports.verifyEmailOtp = verifyEmailOtp;
 /**
  * Standard password login
  */
 const login = async (req, res) => {
     try {
-        const { phone, password } = req.body;
-        if (!phone || !password) {
-            return res.status(400).json({ success: false, message: 'Phone and password are required.' });
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ success: false, message: 'Email and password are required.' });
         }
-        const user = await User_1.User.findOne({ phone });
+        const user = await User_1.User.findOne({ email: email.toLowerCase() });
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found.' });
         }
@@ -256,7 +248,6 @@ const login = async (req, res) => {
             accessToken,
             user: {
                 id: user._id,
-                phone: user.phone,
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,
@@ -326,7 +317,6 @@ const getProfile = async (req, res) => {
             success: true,
             user: {
                 id: user._id,
-                phone: user.phone,
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,
@@ -365,7 +355,6 @@ const updateProfile = async (req, res) => {
             message: 'Profile updated successfully.',
             user: {
                 id: user._id,
-                phone: user.phone,
                 name: user.name,
                 email: user.email,
                 avatar: user.avatar,

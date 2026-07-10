@@ -3,11 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const mongoose_1 = require("mongoose");
 const UserSchema = new mongoose_1.Schema({
-    phone: {
+    email: {
         type: String,
         required: true,
         unique: true,
         trim: true,
+        lowercase: true,
         index: true,
     },
     friendId: {
@@ -20,13 +21,6 @@ const UserSchema = new mongoose_1.Schema({
         type: String,
         default: 'Ludo Master',
         trim: true,
-    },
-    email: {
-        type: String,
-        unique: true,
-        sparse: true, // Allow multiple nulls/undefineds
-        trim: true,
-        lowercase: true,
     },
     password: {
         type: String,

@@ -178,7 +178,7 @@ export const getWithdrawals = async (req: AuthenticatedRequest, res: Response) =
     }
 
     const withdrawals = await Transaction.find(filter)
-      .populate('userId', 'name phone email balance')
+      .populate('userId', 'name email balance')
       .sort({ createdAt: -1 });
 
     return res.status(200).json({ success: true, withdrawals });

@@ -5,7 +5,7 @@ import { updateProfileSuccess } from '../store/authSlice';
 import { apiRequest } from '../services/api';
 import GlassCard from '../components/GlassCard';
 import audioSynth from '../utils/audio';
-import { ArrowLeft, User, Mail, Save, Calendar, CheckCircle, Smartphone } from 'lucide-react';
+import { ArrowLeft, User, Mail, Save, Calendar, CheckCircle } from 'lucide-react';
 
 interface ProfileProps {
   onNavigate: (page: string) => void;
@@ -19,7 +19,6 @@ const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
 
   const [name, setName] = useState(user?.name || '');
   const [avatar, setAvatar] = useState(user?.avatar || 'avatar_1');
-  const [email, setEmail] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -35,7 +34,7 @@ const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
 
     const response = await apiRequest('/auth/profile', {
       method: 'PUT',
-      body: JSON.stringify({ name, avatar, email: email || undefined })
+      body: JSON.stringify({ name, avatar })
     });
 
     setLoading(false);
@@ -118,18 +117,18 @@ const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Phone Display (Readonly) */}
+              {/* Email Display (Readonly) */}
               <div className="flex flex-col gap-1.5">
                 <span className="text-[10px] font-bold text-slate-850 dark:text-slate-45px uppercase tracking-wider">
-                  REGISTERED PHONE
+                  REGISTERED EMAIL
                 </span>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-800 dark:text-slate-400">
-                    <Smartphone size={16} />
+                    <Mail size={16} />
                   </span>
                   <input
                     type="text"
-                    value={user.phone}
+                    value={user.email}
                     readOnly
                     className="w-full pl-12 glass-input py-2.5 text-sm cursor-not-allowed opacity-60 bg-white/5"
                   />
@@ -151,26 +150,6 @@ const Profile: React.FC<ProfileProps> = ({ onNavigate }) => {
                     onChange={(e) => setName(e.target.value)}
                     className="w-full pl-12 glass-input py-2.5 text-sm"
                     maxLength={20}
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-
-              {/* Email field */}
-              <div className="flex flex-col gap-1.5 sm:col-span-2">
-                <span className="text-[10px] font-bold text-slate-850 dark:text-slate-45px uppercase tracking-wider">
-                  EMAIL ADDRESS (FOR SUPPORT TICKET CORRESPONDENCES)
-                </span>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-800 dark:text-slate-400">
-                    <Mail size={16} />
-                  </span>
-                  <input
-                    type="email"
-                    placeholder="Enter email address"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-12 glass-input py-2.5 text-sm"
                     disabled={loading}
                   />
                 </div>

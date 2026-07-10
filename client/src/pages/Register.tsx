@@ -7,7 +7,7 @@ import GlassCard from '../components/GlassCard';
 import ThemeToggle from '../components/ThemeToggle';
 import SoundToggle from '../components/SoundToggle';
 import audioSynth from '../utils/audio';
-import { Phone, User, Mail, Gift, Lock, ArrowRight, ShieldAlert } from 'lucide-react';
+import { User, Mail, Gift, Lock, ArrowRight, ShieldAlert } from 'lucide-react';
 
 interface RegisterProps {
   onNavigate: (page: string, data?: any) => void;
@@ -17,7 +17,6 @@ const Register: React.FC<RegisterProps> = ({ onNavigate }) => {
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state: RootState) => state.auth);
 
-  const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,8 +30,8 @@ const Register: React.FC<RegisterProps> = ({ onNavigate }) => {
     localStorage.removeItem('pendingReferralCode');
   }, [dispatch]);
 
-  const validatePhone = (num: string) => {
-    return /^\d{10,12}$/.test(num);
+  const validateEmail = (val: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
@@ -41,31 +40,36 @@ const Register: React.FC<RegisterProps> = ({ onNavigate }) => {
     setValidationError(null);
     dispatch(clearError());
 
-    if (!phone) {
-      return setValidationError('Phone number is required.');
-    }
-    if (!validatePhone(phone)) {
-      return setValidationError('Please enter a valid phone number (10-12 digits).');
-    }
     if (!name) {
       return setValidationError('Name is required.');
+    }
+    if (!email) {
+      return setValidationError('Email address is required.');
+    }
+    if (!validateEmail(email)) {
+      return setValidationError('Please enter a valid email address.');
+    }
+    if (!password) {
+      return setValidationError('Password is required.');
+    }
+    if (password.length < 6) {
+      return setValidationError('Password must be at least 6 characters long.');
     }
 
     dispatch(authStart());
     const response = await apiRequest('/auth/register', {
       method: 'POST',
       body: JSON.stringify({
-        phone,
         name,
-        email: email || undefined,
-        password: password || undefined,
+        email,
+        password,
         referralCode: referralCode || undefined
       })
     });
 
     if (response.success) {
       dispatch(clearError());
-      onNavigate('otp-verification', { phone, mode: 'register' });
+      onNavigate('otp-verification', { email, mode: 'register' });
     } else {
       dispatch(authFailure(response.message || 'Registration failed. Try again.'));
     }
@@ -103,27 +107,6 @@ const Register: React.FC<RegisterProps> = ({ onNavigate }) => {
 
         <form onSubmit={handleRegisterSubmit} className="space-y-4">
           
-          {/* Phone */}
-          <div className="flex flex-col gap-1">
-            <label className="text-[10px] font-bold tracking-wider text-slate-700 dark:text-slate-300">
-              PHONE NUMBER *
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-800 dark:text-slate-400">
-                <Phone size={16} />
-              </span>
-              <input
-                type="tel"
-                placeholder="Enter 10-digit phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                className="w-full pl-12 glass-input py-2.5 text-sm"
-                maxLength={12}
-                disabled={loading}
-              />
-            </div>
-          </div>
-
           {/* Name */}
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-bold tracking-wider text-slate-700 dark:text-slate-300">
@@ -147,7 +130,7 @@ const Register: React.FC<RegisterProps> = ({ onNavigate }) => {
           {/* Email */}
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-bold tracking-wider text-slate-700 dark:text-slate-300">
-              EMAIL ADDRESS (OPTIONAL)
+              EMAIL ADDRESS *
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-800 dark:text-slate-400">
@@ -167,7 +150,7 @@ const Register: React.FC<RegisterProps> = ({ onNavigate }) => {
           {/* Password */}
           <div className="flex flex-col gap-1">
             <label className="text-[10px] font-bold tracking-wider text-slate-700 dark:text-slate-300">
-              PASSWORD (OPTIONAL)
+              PASSWORD *
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-800 dark:text-slate-400">

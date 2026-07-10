@@ -31,13 +31,12 @@ if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
   console.warn('[CONFIG WARNING] Razorpay credentials are missing in your server .env!');
   console.warn('Payments will fail with config error until RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are set.');
   console.warn('========================================================================\n');
-} else if (
-  process.env.RAZORPAY_KEY_ID.includes('xxxxxxxxx') ||
-  process.env.RAZORPAY_KEY_SECRET.includes('xxxxxxxx')
-) {
+}
+
+if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
   console.warn('\n========================================================================');
-  console.warn('[CONFIG WARNING] Razorpay credentials are using placeholder values!');
-  console.warn('Payments will fail with 401 Unauthorized until actual dashboard keys are set.');
+  console.warn('[CONFIG WARNING] Brevo SMTP credentials (SMTP_USER / SMTP_PASS) are missing in your server .env!');
+  console.warn('Emails will not be sent, but OTPs will still print to your terminal console for local testing.');
   console.warn('========================================================================\n');
 }
 

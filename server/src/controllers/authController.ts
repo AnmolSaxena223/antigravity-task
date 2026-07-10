@@ -13,30 +13,22 @@ import {
   generateOTP,
   generateRandomString
 } from '../utils/security';
-
-/**
- * Send OTP mock service
- */
-const sendMockSMS = (phone: string, otp: string) => {
-  console.log(`\n==============================================`);
-  console.log(`[SMS Gateway] Sending OTP ${otp} to phone ${phone}`);
-  console.log(`==============================================\n`);
-};
+import { sendOTPEmail } from '../services/emailService';
 
 /**
  * Register User
  */
 export const register = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { phone, name, email, password, referralCode } = req.body;
+    const { name, email, password, referralCode } = req.body;
 
-    if (!phone) {
-      return res.status(400).json({ success: false, message: 'Phone number is required.' });
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email address is required.' });
     }
 
-    const existingUser = await User.findOne({ phone });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Phone number is already registered.' });
+      return res.status(400).json({ success: false, message: 'Email address is already registered.' });
     }
 
     // Process referral code if provided
@@ -62,9 +54,8 @@ export const register = async (req: AuthenticatedRequest, res: Response) => {
     const hashedPassword = password ? await hashPassword(password) : undefined;
 
     const user = new User({
-      phone,
+      email: email.toLowerCase(),
       name: name || 'Ludo Player',
-      email,
       password: hashedPassword,
       otp,
       otpExpiry,
@@ -74,12 +65,12 @@ export const register = async (req: AuthenticatedRequest, res: Response) => {
     });
 
     await user.save();
-    sendMockSMS(phone, otp);
+    await sendOTPEmail(email, otp);
 
     return res.status(201).json({
       success: true,
       message: 'Registration successful. OTP sent for verification.',
-      phone
+      email
     });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
@@ -87,16 +78,16 @@ export const register = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 /**
- * Send OTP to existing / registering user
+ * Send OTP to existing / registering user email
  */
-export const sendOtp = async (req: AuthenticatedRequest, res: Response) => {
+export const sendEmailOtp = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { phone } = req.body;
-    if (!phone) {
-      return res.status(400).json({ success: false, message: 'Phone number is required.' });
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Email address is required.' });
     }
 
-    let user = await User.findOne({ phone });
+    let user = await User.findOne({ email: email.toLowerCase() });
 
     // If user doesn't exist, we can register them automatically
     const otp = generateOTP();
@@ -105,7 +96,8 @@ export const sendOtp = async (req: AuthenticatedRequest, res: Response) => {
     if (!user) {
       const newUserReferralCode = 'REF' + generateRandomString(5);
       user = new User({
-        phone,
+        email: email.toLowerCase(),
+        name: email.split('@')[0] || 'Ludo Player',
         otp,
         otpExpiry,
         isVerified: false,
@@ -117,12 +109,12 @@ export const sendOtp = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     await user.save();
-    sendMockSMS(phone, otp);
+    await sendOTPEmail(email, otp);
 
     return res.status(200).json({
       success: true,
       message: 'OTP sent successfully.',
-      phone
+      email
     });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
@@ -130,16 +122,16 @@ export const sendOtp = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 /**
- * Verify OTP & Issue Token
+ * Verify Email OTP & Issue Token
  */
-export const verifyOtp = async (req: AuthenticatedRequest, res: Response) => {
+export const verifyEmailOtp = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { phone, otp } = req.body;
-    if (!phone || !otp) {
-      return res.status(400).json({ success: false, message: 'Phone and OTP are required.' });
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: 'Email and OTP are required.' });
     }
 
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
@@ -228,7 +220,6 @@ export const verifyOtp = async (req: AuthenticatedRequest, res: Response) => {
       accessToken,
       user: {
         id: user._id,
-        phone: user.phone,
         name: user.name,
         email: user.email,
         avatar: user.avatar,
@@ -249,12 +240,12 @@ export const verifyOtp = async (req: AuthenticatedRequest, res: Response) => {
  */
 export const login = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { phone, password } = req.body;
-    if (!phone || !password) {
-      return res.status(400).json({ success: false, message: 'Phone and password are required.' });
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
 
-    const user = await User.findOne({ phone });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found.' });
     }
@@ -296,7 +287,6 @@ export const login = async (req: AuthenticatedRequest, res: Response) => {
       accessToken,
       user: {
         id: user._id,
-        phone: user.phone,
         name: user.name,
         email: user.email,
         avatar: user.avatar,
@@ -372,7 +362,6 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
       success: true,
       user: {
         id: user._id,
-        phone: user.phone,
         name: user.name,
         email: user.email,
         avatar: user.avatar,
@@ -410,7 +399,6 @@ export const updateProfile = async (req: AuthenticatedRequest, res: Response) =>
       message: 'Profile updated successfully.',
       user: {
         id: user._id,
-        phone: user.phone,
         name: user.name,
         email: user.email,
         avatar: user.avatar,

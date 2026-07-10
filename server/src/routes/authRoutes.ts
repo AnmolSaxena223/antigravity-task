@@ -8,8 +8,8 @@ const router = Router();
 
 // Rate limited auth endpoints
 router.post('/register', authLimiter, validateRegister, authController.register);
-router.post('/send-otp', authLimiter, validateLogin, authController.sendOtp);
-router.post('/verify-otp', authLimiter, validateVerifyOtp, authController.verifyOtp);
+router.post('/send-email-otp', authLimiter, validateLogin, authController.sendEmailOtp);
+router.post('/verify-email-otp', authLimiter, validateVerifyOtp, authController.verifyEmailOtp);
 router.post('/login', authLimiter, validateLogin, authController.login);
 router.post('/refresh-token', authController.refreshToken);
 
