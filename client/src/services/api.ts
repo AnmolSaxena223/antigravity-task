@@ -1,7 +1,8 @@
 import { store } from '../store';
 import { authSuccess, logoutSuccess } from '../store/authSlice';
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 /**
  * Standard typed API response interface
@@ -26,11 +27,11 @@ export const apiRequest = async <T = any>(
 
   // Clone headers
   const headers = new Headers(options.headers || {});
-  
+
   if (!headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
-  
+
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
   }
@@ -46,9 +47,9 @@ export const apiRequest = async <T = any>(
     // If access token is expired, attempt to refresh it
     if (response.status === 401 && token) {
       console.log('[API Service] Access token expired, attempting to refresh...');
-      
+
       const refreshSuccess = await attemptTokenRefresh();
-      
+
       if (refreshSuccess) {
         // Retry original request with the fresh token
         const freshToken = store.getState().auth.token;
@@ -64,7 +65,7 @@ export const apiRequest = async <T = any>(
     }
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || 'Something went wrong.');
     }
