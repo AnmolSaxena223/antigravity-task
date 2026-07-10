@@ -4,7 +4,7 @@
   "description": "Secure, production-ready Ludo Game Backend",
   "main": "dist/app.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc",
     "start": "node dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
   },
