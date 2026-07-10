@@ -4,10 +4,10 @@
   "description": "Secure, production-ready Ludo Game Backend",
   "main": "dist/app.js",
   "scripts": {
-    "build": "npx tsc",
+    "build": "node node_modules/typescript/bin/tsc",
     "start": "node dist/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
-  },
+  }
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
